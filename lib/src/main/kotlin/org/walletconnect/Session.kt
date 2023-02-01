@@ -167,6 +167,6 @@ interface Session {
             val icons: List<String>? = null
     )
 
-    data class SessionParams(val chainId: Long?, val accounts: List<String>?, val peerData: PeerData?)
+    data class SessionParams(val approved: Boolean, val chainId: Long?, val accounts: List<String>?, val peerData: PeerData?)
     data class Error(val code: Long, val message: String)
 }
