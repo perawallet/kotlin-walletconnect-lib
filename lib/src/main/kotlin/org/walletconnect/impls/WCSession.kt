@@ -22,7 +22,8 @@ class WCSession(
     private var currentKey: String
 
     private var approvedAccounts: List<String>? = null
-    private var chainId: Long? = null
+    var chainId: Long? = null
+        private set
     private var handshakeId: Long? = null
     private var peerId: String? = null
     private var peerMeta: Session.PeerMeta? = null
