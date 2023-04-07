@@ -22,7 +22,8 @@ class WCSession(
     private var currentKey: String
 
     private var approvedAccounts: List<String>? = null
-    private var chainId: Long? = null
+    var chainId: Long? = null
+        private set
     private var handshakeId: Long? = null
     private var peerId: String? = null
     private var peerMeta: Session.PeerMeta? = null
@@ -182,8 +183,9 @@ class WCSession(
         propagateToCallbacks {
             onStatus(when(status) {
                 Session.Transport.Status.Connected -> Session.Status.Connected(clientData.id)
-                is Session.Transport.Status.Disconnected -> Session.Status.Disconnected(status.isSessionDeletionNeeded)
                 is Session.Transport.Status.Error -> Session.Status.Error(Session.TransportError(status.throwable))
+                is Session.Transport.Status.ConnectionClosed -> Session.Status.Disconnected(status.cause, status.code)
+                is Session.Transport.Status.ConnectionFailed -> Session.Status.ConnectionFailed(status.cause, status.code)
             })
         }
     }
@@ -295,8 +297,7 @@ class WCSession(
     }
 
     override fun kill() {
-        val params = Session.SessionParams(false, null, null, null)
-        send(Session.MethodCall.SessionUpdate(createCallId(), params))
+        propagateToCallbacks { onStatus(Session.Status.Killed(sessionId = clientData.id, cause = null)) }
         endSession()
     }
 }

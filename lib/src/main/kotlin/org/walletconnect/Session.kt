@@ -79,10 +79,12 @@ interface Session {
 
     sealed class Status {
         data class Connected(val clientId: String) : Status()
-        data class Disconnected(val isSessionDeletionNeeded: Boolean) : Status()
+        data class Disconnected(val cause: Throwable, val code: Int) : Status()
+        data class ConnectionFailed(val cause: Throwable, val code: Int?) : Status()
         data class Approved(val clientId: String) : Status()
         object Closed : Status()
         data class Error(val throwable: Throwable) : Status()
+        data class Killed(val sessionId: String, val cause: Throwable?): Status()
     }
 
     data class TransportError(override val cause: Throwable) : RuntimeException("Transport exception caused by $cause", cause)
@@ -105,8 +107,9 @@ interface Session {
 
         sealed class Status {
             object Connected : Status()
-            data class Disconnected(val isSessionDeletionNeeded: Boolean) : Status()
             data class Error(val throwable: Throwable) : Status()
+            data class ConnectionClosed(val cause: Throwable, val code: Int): Status()
+            data class ConnectionFailed(val cause: Throwable, val code: Int?) : Status()
         }
 
         data class Message(

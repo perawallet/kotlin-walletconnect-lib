@@ -98,19 +98,16 @@ class OkHttpTransport(
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
-        statusHandler(Error(t))
-        disconnected(isSessionDeletionNeeded = false)
+        socket = null
+        connected = false
+        statusHandler(Session.Transport.Status.ConnectionFailed(t, response?.code()))
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         super.onClosed(webSocket, code, reason)
-        disconnected(isSessionDeletionNeeded = true)
-    }
-
-    private fun disconnected(isSessionDeletionNeeded: Boolean) {
         socket = null
         connected = false
-        statusHandler(Disconnected(isSessionDeletionNeeded))
+        statusHandler(Session.Transport.Status.ConnectionClosed(Throwable(reason), code))
     }
 
     private fun tryExec(block: () -> Unit): Boolean {
